@@ -72,7 +72,7 @@ public class splineSpecial extends LinearOpMode {
 
         drive.setPoseEstimate(startPose);
         Trajectory to = drive.trajectoryBuilder(startPose)
-                .splineToSplineHeading(new Pose2d(2, 5, Math.toRadians(90)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(22, 25, Math.toRadians(90)), Math.toRadians(0))
                 .build();
         Trajectory from = drive.trajectoryBuilder(to.end())
                 .splineToLinearHeading(new Pose2d(0, 0, Math.toRadians(0)), Math.toRadians(0))
