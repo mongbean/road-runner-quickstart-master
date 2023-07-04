@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.subSystems.slides;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -35,7 +35,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 
 /**
  * This file works in conjunction with the External Hardware Class sample called: ConceptExternalHardwareClass.java
@@ -71,6 +70,14 @@ public class LinearSlidePID {
     public static final double Ki = 1;
     public static final double Kd = 1;
     public static final double Kg = 1;
+    public static final double epsilon = 0.01;
+
+    public static double integral = 0;
+    public double error;
+    public double lastError=0;
+    public double derivative;
+    public double out;
+    public ElapsedTime timer = new ElapsedTime();
 
     public void slideInit()    {
         // ACTUAL NAMES
@@ -80,49 +87,50 @@ public class LinearSlidePID {
         armMotor2.setDirection(DcMotor.Direction.FORWARD);
         armMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        timer.reset();
 
         myOpMode.telemetry.addData(">", "Slide Initialized");
         myOpMode.telemetry.update();
+
     }
 
     public void slidePID(double height) {
-        double integral = 0;
-        double error = height - armMotor1.getCurrentPosition();
-        double lastError = error;
-        double epsilon = 0.01;
-        double derivative;
-        double out;
-        ElapsedTime timer = new ElapsedTime();
-        while (Math.abs(error)<=epsilon){
-            // rate of change of the error
-            derivative = (error - lastError) / timer.seconds();
+        error = height - armMotor1.getCurrentPosition();
 
-            // sum of all error over time
-            integral = integral + (error * timer.seconds());
+        // rate of change of the error
+        derivative = (error - lastError) / timer.milliseconds();
 
-            out = (Kp * error) + (Ki * integral) + (Kd * derivative) + Kg;
+        // sum of all error over time
+        integral = integral + (error * timer.milliseconds());
 
-            armMotor1.setPower(out);
-            armMotor2.setPower(out);
+        out = (Kp * error) + (Ki * integral) + (Kd * derivative) + Kg;
 
-            lastError = error;
-            error = height - armMotor1.getCurrentPosition();
+        armMotor1.setPower(out);
+        armMotor2.setPower(out);
 
-            // integral dt
-            timer.reset();
-        }
+        error = height - armMotor1.getCurrentPosition();
+        timer.reset();
+
     }
     public void slideGround(){
-        slidePID(0);
+        while (Math.abs(armMotor1.getCurrentPosition()) > epsilon) {
+            slidePID(0);
+        }
     }
     public void slideLow(){
-        slidePID(200);
+        while (Math.abs(armMotor1.getCurrentPosition()-200) > epsilon){
+            slidePID(200);
+        }
     }
     public void slideMid(){
-        slidePID(300);
+        while (Math.abs(armMotor1.getCurrentPosition()-300) > epsilon){
+            slidePID(300);
+        }
     }
     public void slideHigh(){
-        slidePID(400);
+        while (Math.abs(armMotor1.getCurrentPosition()-400) > epsilon){
+            slidePID(400);
+        }
     }
 
 }
